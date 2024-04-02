@@ -1,17 +1,28 @@
+import * as React from "react";
 import {
-  Backdrop,
   Box,
   Button,
   Dialog,
-  DialogActions,
   DialogContent,
-  IconButton,
-  backdropClasses,
+  MobileStepper,
 } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { useTheme } from "@mui/material/styles";
+import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
+import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
+import PropTypes from "prop-types";
 
-const ImagePreview = (props) => {
-  const { selectedImage, setSelectedImage } = props;
+const ImagePreview = ({ selectedImage, setSelectedImage }) => {
+  const theme = useTheme();
+  const [activeStep, setActiveStep] = React.useState(0);
+  const maxSteps = selectedImage.length;
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
 
   return (
     <Dialog
@@ -26,45 +37,62 @@ const ImagePreview = (props) => {
     >
       <DialogContent sx={{ color: "black" }}>
         {selectedImage && (
-          <div
-            style={{
-              position: "relative",
-              maxWidth: "100%",
-              maxHeight: "80vh",
-            }}
-          >
-            <Box borderRadius={10}>
-              <img
-                src={selectedImage}
-                alt="Uploaded Image"
-                style={{ width: "100%", height: "auto", display: "block", borderRadius: '5%' }}
-              />
-            </Box>
-
-            <IconButton
-              onClick={() => setSelectedImage(null)}
+          <>
+            <Box
+              component="img"
               sx={{
-                position: "fixed",
-                top: 10,
-                right: 10,
-                color: "grey",
-                backgroundColor: "rgba(0, 0, 0, 0.5)",
-                height: "32px",
-                width: "32px",
+                height: 255,
+                display: "block",
+                maxWidth: 400,
+                overflow: "hidden",
+                width: "100%",
               }}
-            >
-              <CloseIcon />
-            </IconButton>
-          </div>
+              src={selectedImage[activeStep]}
+              alt={`Image ${activeStep + 1}`}
+            />
+            <MobileStepper
+              steps={maxSteps}
+              position="static"
+              activeStep={activeStep}
+              nextButton={
+                <Button
+                  size="small"
+                  onClick={handleNext}
+                  disabled={activeStep === maxSteps - 1}
+                >
+                  Next
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowLeft />
+                  ) : (
+                    <KeyboardArrowRight />
+                  )}
+                </Button>
+              }
+              backButton={
+                <Button
+                  size="small"
+                  onClick={handleBack}
+                  disabled={activeStep === 0}
+                >
+                  {theme.direction === "rtl" ? (
+                    <KeyboardArrowRight />
+                  ) : (
+                    <KeyboardArrowLeft />
+                  )}
+                  Back
+                </Button>
+              }
+            />
+          </>
         )}
       </DialogContent>
-      <DialogActions style={{justifyContent: 'center'}}>
-        <Button >
-            Remove
-        </Button>
-      </DialogActions>
     </Dialog>
   );
+};
+
+ImagePreview.propTypes = {
+  selectedImage: PropTypes.array,
+  setSelectedImage: PropTypes.func
 };
 
 export default ImagePreview;

@@ -1,18 +1,23 @@
 import * as React from "react";
-import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogContentText from "@mui/material/DialogContentText";
-import DialogTitle from "@mui/material/DialogTitle";
-import { Box, Card, Input, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  Stack,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Button,
+} from "@mui/material";
 import AspectRatio from "@mui/joy/AspectRatio";
-import ImagePreview from "./ImagePreview";
 
-export default function AddRestockItem({ open, setOpen }) {
+import { addNewItem, uploadImagesAndReturnURLs } from "../firebase/utils";
+import PropTypes from "prop-types";
+
+export default function AddRestockItem({ open, setOpen, rows, setRows }) {
   const [images, setImages] = React.useState([]);
-  const [selectedImage, setSelectedImage] = React.useState(null);
+  const [itemName, setItemName] = React.useState("");
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -36,12 +41,42 @@ export default function AddRestockItem({ open, setOpen }) {
     }
   };
 
-  const handleClickOpen = () => {
-    setOpen(true);
+  const handleClose = () => {
+    setImages([]);
+    setItemName("");
+    setOpen(false);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleConfirm = async () => {
+    if (itemName === "") {
+      console.log("Invalid Entry");
+      return;
+    }
+
+    try {
+      let imageUrls = [];
+      if (images.length > 0) {
+        // Wait for the image URLs to be retrieved
+        imageUrls = await uploadImagesAndReturnURLs(images);
+      }
+
+      try {
+        const newItem = {
+          item: itemName,
+          imageRef: imageUrls, // Now imageUrls will have the resolved URLs
+          delivered: false,
+          ordered: false,
+        };
+
+        const id = await addNewItem(newItem);
+        setRows([...rows, { ...newItem, id: id }]);
+      } catch (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.error("Error adding item:", error);
+    }
+    handleClose();
   };
 
   return (
@@ -68,6 +103,8 @@ export default function AddRestockItem({ open, setOpen }) {
             type="text"
             fullWidth
             variant="standard"
+            value={itemName}
+            onChange={(e) => setItemName(e.target.value)}
           />
 
           <Stack
@@ -97,7 +134,6 @@ export default function AddRestockItem({ open, setOpen }) {
                     size="sm"
                     key={image.name}
                     variant="outlined"
-                    onClick={() => setSelectedImage(URL.createObjectURL(image))}
                   >
                     <AspectRatio
                       key={image.name}
@@ -115,100 +151,35 @@ export default function AddRestockItem({ open, setOpen }) {
                 ))}
               </Box>
             )}
-            <ImagePreview selectedImage={selectedImage} setSelectedImage={setSelectedImage}/>
             <input
               type="file"
               accept="image/*"
               onChange={handleFileChange}
-              //capture="camera" // This attribute triggers camera capture
+              capture="camera" // This attribute triggers camera capture
               style={{ display: "none" }} // Hiding the default input appearance
               id="image-upload"
             />
-            <Button variant="contained" color="primary" component="label">
-              Upload Image
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleFileChange}
-                style={{ display: "none" }} // Hiding the default input appearance
-              />
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleCaptureClick}
+            >
+              Take Picture
             </Button>
           </Stack>
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center" }}>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button onClick={handleClose}>Confirm</Button>
+          <Button onClick={handleConfirm}>Confirm</Button>
         </DialogActions>
       </Dialog>
     </React.Fragment>
   );
 }
 
-// AddRestockItem.propTypes = {
-//     rows: PropTypes.array,
-//     setRows: PropTypes.func
-//   };
-
-{
-  /* <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            capture="camera" // This attribute triggers camera capture
-            style={{ display: "none" }} // Hiding the default input appearance
-            id="image-upload"
-          />
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleCaptureClick}
-          >
-            Take Picture
-          </Button>
-          <Button variant="contained" color="primary" component="label">
-            Upload Image
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              style={{ display: "none" }} // Hiding the default input appearance
-            />
-          </Button> 
-          
-          
-           {selectedFile && (
-        <div>
-          <Typography variant="subtitle1">Selected File: {selectedFile.name}</Typography>
-          <img src={URL.createObjectURL(selectedFile)} alt="Uploaded Image" style={{ maxWidth: '100%' }} />
-        </div>
-      )}
-      
-      <Box
-      sx={{
-        display: 'flex',
-        gap: 1,
-        py: 1,
-        overflow: 'auto',
-        width: 343,
-        scrollSnapType: 'x mandatory',
-        '& > *': {
-          scrollSnapAlign: 'center',
-        },
-        '::-webkit-scrollbar': { display: 'none' },
-      }}
-    >
-      {images.map((item) => (
-        <Card orientation="horizontal" size="sm" key={item.title} variant="outlined">
-          <AspectRatio ratio="1" sx={{ minWidth: 60 }}>
-            <img
-              srcSet={`${item.src}?h=120&fit=crop&auto=format&dpr=2 2x`}
-              src={`${item.src}?h=120&fit=crop&auto=format`}
-              alt={item.title}
-            />
-          </AspectRatio>
-        </Card>
-      ))}
-    </Box>
-    
-    */
-}
+AddRestockItem.propTypes = {
+  rows: PropTypes.array,
+  setRows: PropTypes.func,
+  open: PropTypes.bool,
+  setOpen: PropTypes.func
+};

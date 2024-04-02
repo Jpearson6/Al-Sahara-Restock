@@ -8,6 +8,7 @@ import { firestore } from "./firebase/config";
 import SignIn from "./pages/SignIn";
 import HomePage from "./pages/HomePage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
+import CircularLoading from "./components/CircularLoading";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -40,7 +41,7 @@ function App() {
   }, []);
 
   if (isFetching) {
-    return <div>Loading...</div>;
+    return <CircularLoading/>;
   }
 
   return (

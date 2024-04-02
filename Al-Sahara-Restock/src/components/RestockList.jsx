@@ -1,33 +1,18 @@
 import * as React from "react";
-import {
-  Box,
-  Checkbox,
-  Divider,
-  Fab,
-  List,
-  ListItemAvatar,
-  ListItemButton,
-  ListItemText,
-  Typography,
-} from "@mui/material";
+import { Divider, Fab, Typography } from "@mui/material";
 
-import { firestore } from "../firebase/config";
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  updateDoc,
-} from "firebase/firestore";
 import AddRestockItem from "./AddRestockItem";
 import AddIcon from "@mui/icons-material/Add";
 import styled from "@emotion/styled";
+import { getRestockItems } from "../firebase/utils";
+import ImagePreview from "./ImagePreview";
+import ItemList from "./ItemList";
+import PropTypes from "prop-types";
 
 const StyledFab = styled(Fab)({
-  position: "absolute",
+  position: "fixed",
   zIndex: 1,
-  bottom: 60,
+  bottom: "10%",
   left: 0,
   right: 0,
   margin: "0 auto",
@@ -35,51 +20,11 @@ const StyledFab = styled(Fab)({
 
 export default function RestockList({ role }) {
   const [rows, setRows] = React.useState(null);
-  const [open , setOpen] = React.useState(false);
-
-  const handleCheckboxOrdered = (index) => {
-    if (role === "employee") return;
-    markItemAsOrdered(rows[index].id);
-    const newRows = [...rows.slice(0, index), ...rows.slice(index + 1)];
-    setRows(newRows);
-  };
-
-  const markItemAsOrdered = async (itemId) => {
-    try {
-      // Get a reference to the item document
-      const itemDocRef = doc(firestore, "items", itemId);
-
-      // Update the "ordered" field to true
-      await updateDoc(itemDocRef, {
-        ordered: true,
-      });
-      return true; // Return true to indicate success
-    } catch (error) {
-      console.error("Error marking item as ordered:", error);
-      return false; // Return false to indicate failure
-    }
-  };
+  const [open, setOpen] = React.useState(false);
+  const [selectedImage, setSelectedImage] = React.useState(null);
 
   React.useEffect(() => {
-    const fetchItems = async () => {
-      const itemsCollection = collection(firestore, "items");
-      const q = query(itemsCollection, where("ordered", "==", false));
-
-      try {
-        const querySnapshot = await getDocs(q);
-        const items = [];
-        querySnapshot.forEach((doc) => {
-          items.push({ id: doc.id, ...doc.data() });
-        });
-        setRows(items);
-        return;
-      } catch (error) {
-        console.error("Error fetching items:", error);
-        return;
-      }
-    };
-
-    fetchItems();
+    getRestockItems(setRows);
   }, []);
 
   return (
@@ -93,22 +38,33 @@ export default function RestockList({ role }) {
         Restock
       </Typography>
       <Divider />
-      <List sx={{ width: "100%", maxWidth: 360, bgcolor: "background.paper" }}>
-        <ListItemButton alignItems="center">
-          <ListItemAvatar>Image</ListItemAvatar>
-          <ListItemText
-            primary={
-              <Typography textAlign={"center"} justifyContent={"center"}>
-                Flum
-              </Typography>
-            }
-          />
-        </ListItemButton>
-      </List>
-      <AddRestockItem open={open} setOpen={setOpen}/>
+      <AddRestockItem
+        open={open}
+        setOpen={setOpen}
+        setRows={setRows}
+        rows={rows}
+      />
+
+      {selectedImage && (
+        <ImagePreview
+          selectedImage={selectedImage}
+          setSelectedImage={setSelectedImage}
+        />
+      )}
       <StyledFab color="secondary">
-        <AddIcon onClick={() => setOpen(true)}/>
+        <AddIcon onClick={() => setOpen(true)} />
       </StyledFab>
+      <ItemList
+        rows={rows}
+        setRows={setRows}
+        role={role}
+        setSelectedImage={setSelectedImage}
+        listType={"Ordered"}
+      />
     </>
   );
 }
+
+RestockList.propTypes = {
+  role: PropTypes.string
+};

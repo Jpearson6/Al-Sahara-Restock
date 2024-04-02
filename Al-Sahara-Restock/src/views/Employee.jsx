@@ -1,12 +1,12 @@
+import React from "react";
 import AppBar from "@mui/material/AppBar";
 import Button from "@mui/material/Button";
-import { CssBaseline, Fab, Stack, Toolbar } from "@mui/material";
+import { CssBaseline, Stack, Toolbar } from "@mui/material";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { menuComponents } from "../components/MenuComponents";
-import React from "react";
-import styled from "@emotion/styled";
-import RestockList from "../components/RestockList";
+import PropTypes from "prop-types";
+
 
 const EmployeeView = ({ role }) => {
   const [selectedItem, setSelectedItem] = React.useState("RestockList");
@@ -37,32 +37,41 @@ const EmployeeView = ({ role }) => {
   };
 
   return (
-    <React.Fragment>
-      <CssBaseline />
-      {findSelectedComponent(selectedItem).component}
-      <AppBar position="fixed" color="primary" sx={{ top: "auto", bottom: 0 }}>
-        <Toolbar sx={{ justifyContent: "center" }}>
-          <Stack direction={"row"}>
-            <Button
-              onClick={() => handleSelectedItem("RestockList")}
-              color="inherit"
-            >
-              Restock
-            </Button>
-            <Button
-              onClick={() => handleSelectedItem("OrderedList")}
-              color="inherit"
-            >
-              Ordered
-            </Button>
-            <Button color="inherit" onClick={handleSignOut}>
-              Log Out
-            </Button>
-          </Stack>
-        </Toolbar>
-      </AppBar>
-    </React.Fragment>
+      <React.Fragment>
+        <CssBaseline/>
+        {findSelectedComponent(selectedItem).component}
+        <AppBar
+          position="fixed"
+          color="primary"
+          sx={{ top: "auto", bottom: 0 }}
+        >
+          <Toolbar sx={{ justifyContent: "center" }}>
+            <Stack direction={"row"}>
+              <Button
+                onClick={() => handleSelectedItem("RestockList")}
+                color="inherit"
+              >
+                Restock
+              </Button>
+              <Button
+                onClick={() => handleSelectedItem("OrderedList")}
+                color="inherit"
+              >
+                Ordered
+              </Button>
+              <Button color="inherit" onClick={handleSignOut}>
+                Log Out
+              </Button>
+            </Stack>
+          </Toolbar>
+        </AppBar>
+      </React.Fragment>
   );
 };
+
+EmployeeView.propTypes = {
+  role: PropTypes.string,
+};
+
 
 export default EmployeeView;

@@ -1,13 +1,14 @@
+import React from "react";
 import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import { Card, Stack } from "@mui/material";
+import { CssBaseline, Stack, Toolbar } from "@mui/material";
 import { signOut } from "firebase/auth";
 import { auth } from "../firebase/config";
 import { menuComponents } from "../components/MenuComponents";
-import React from "react";
-const OwnerView = ({role}) => {
-  const [selectedItem, setSelectedItem] = React.useState('UserList');
+import PropTypes from "prop-types";
+
+const OwnerView = ({ role }) => {
+  const [selectedItem, setSelectedItem] = React.useState("RestockList");
 
   const handleSignOut = () => {
     signOut(auth)
@@ -35,31 +36,36 @@ const OwnerView = ({role}) => {
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "100%",
-        maxHeight: "100%",
-        overflow: "auto",
-      }}
-    >
-      <Card>
-        <AppBar position="static">
-          <Stack direction={"row"} justifyContent={"space-between"}>
-            <Button onClick={() => handleSelectedItem('UserList')} color="inherit">Users</Button>
-            <Button onClick={() => handleSelectedItem('RestockList')}  color="inherit">Restock</Button>
-            <Button onClick={() => handleSelectedItem('OrderedList')}  color="inherit">Ordered</Button>
+    <React.Fragment>
+      <CssBaseline />
+      {findSelectedComponent(selectedItem).component}
+      <AppBar position="fixed" color="primary" sx={{ top: "auto", bottom: 0 }}>
+        <Toolbar sx={{ justifyContent: "center" }}>
+          <Stack direction={"row"}>
+            <Button
+              onClick={() => handleSelectedItem("RestockList")}
+              color="inherit"
+            >
+              Restock
+            </Button>
+            <Button
+              onClick={() => handleSelectedItem("OrderedList")}
+              color="inherit"
+            >
+              Ordered
+            </Button>
             <Button color="inherit" onClick={handleSignOut}>
               Log Out
             </Button>
           </Stack>
-        </AppBar>
-        {findSelectedComponent(selectedItem).component}
-      </Card>
-    </Box>
+        </Toolbar>
+      </AppBar>
+    </React.Fragment>
   );
+};
+
+OwnerView.propTypes = {
+  role: PropTypes.string,
 };
 
 export default OwnerView;
