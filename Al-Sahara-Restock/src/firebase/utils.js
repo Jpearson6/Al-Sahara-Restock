@@ -10,11 +10,20 @@ import {
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 import { storage, firestore } from "../firebase/config";
 
+function generateRandomId(length) {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomId = '';
+  for (let i = 0; i < length; i++) {
+    randomId += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  return randomId;
+}
+
 const uploadImagesAndReturnURLs = async (images) => {
   let imageUrls = [];
 
   const uploadPromises = images.map((image) => {
-    const storageRef = ref(storage, "images/" + image.name);
+    const storageRef = ref(storage, "images/" + generateRandomId(12) + image.name );
     const uploadTask = uploadBytesResumable(storageRef, image);
 
     // Listen for state changes, errors, and completion of the upload.
