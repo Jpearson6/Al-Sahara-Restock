@@ -14,8 +14,6 @@ import { Navigate } from 'react-router-dom';
 
 import PropTypes from 'prop-types';
 
-// Other imports and component code...
-
 const defaultTheme = createTheme();
 
 export default function SignIn({user}) {
