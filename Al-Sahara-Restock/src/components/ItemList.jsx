@@ -32,7 +32,7 @@ const ItemList = ({ rows, setRows, role, setSelectedImage, listType }) => {
 
   return (
     <>
-      <Box maxHeight={"80vh"} overflow={"scroll"} width={'100vw'} sx={{pr: 0}}>
+      <Box maxHeight={"75vh"} overflow={"scroll"} width={'100vw'} sx={{pr: 0}}>
         <TableContainer>
           <Table sx={{ minWidth: "100%" }} aria-label="simple table">
             <TableHead>
