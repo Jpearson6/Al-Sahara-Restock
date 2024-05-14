@@ -8,6 +8,7 @@ import { getRestockItems } from "../firebase/utils";
 import ImagePreview from "./ImagePreview";
 import ItemList from "./ItemList";
 import PropTypes from "prop-types";
+import CircularLoading from "./CircularLoading";
 
 const StyledFab = styled(Fab)({
   position: "fixed",
@@ -22,10 +23,24 @@ export default function RestockList({ role }) {
   const [rows, setRows] = React.useState(null);
   const [open, setOpen] = React.useState(false);
   const [selectedImage, setSelectedImage] = React.useState(null);
+  const [showLoading, setShowLoading] = React.useState(true);
 
   React.useEffect(() => {
     getRestockItems(setRows);
   }, []);
+
+  React.useEffect(() => {
+    // Show loading for 1 second before showing the image preview
+    const timeoutId = setTimeout(() => {
+      setShowLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
+  }, [showLoading]);
+
+  if (showLoading) {
+    return <CircularLoading />;
+  }
 
   return (
     <>
