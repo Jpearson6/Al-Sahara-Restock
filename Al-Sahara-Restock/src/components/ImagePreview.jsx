@@ -35,17 +35,15 @@ const ImagePreview = ({ selectedImage, setSelectedImage }) => {
         },
       }}
     >
-      <DialogContent sx={{ color: "black" }}>
+      <DialogContent sx={{ color: "black", width: "100%", height: "100%" }}>
         {selectedImage && (
           <>
             <Box
               component="img"
               sx={{
-                height: 255,
-                display: "block",
-                maxWidth: 400,
-                overflow: "hidden",
-                width: "100%",
+                width: "100%", // Make image span full width
+                height: "100%", // Make image span full height
+                objectFit: "contain", // Preserve aspect ratio
               }}
               src={selectedImage[activeStep]}
               alt={`Image ${activeStep + 1}`}
@@ -92,7 +90,7 @@ const ImagePreview = ({ selectedImage, setSelectedImage }) => {
 
 ImagePreview.propTypes = {
   selectedImage: PropTypes.array,
-  setSelectedImage: PropTypes.func
+  setSelectedImage: PropTypes.func,
 };
 
 export default ImagePreview;
